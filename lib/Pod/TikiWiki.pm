@@ -1,9 +1,9 @@
-ï»¿package Pod::TikiWiki;
+package Pod::TikiWiki;
 use strict;
 
-# $Id: TikiWiki.pm,v 1.3 2004/06/16 15:07:23 cbouvi Exp $
+# $Id: TikiWiki.pm,v 1.6 2004/06/18 08:30:09 cbouvi Exp $
 #
-#  Copyright Â© 2004 CÃ©dric Bouvier
+#  Copyright © 2004 Cédric Bouvier
 #
 #  This library is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License as published by the Free
@@ -20,6 +20,15 @@ use strict;
 #  Place, Suite 330, Boston, MA  02111-1307  USA
 #
 # $Log: TikiWiki.pm,v $
+# Revision 1.6  2004/06/18 08:30:09  cbouvi
+# Handles =pod and =cut
+#
+# Revision 1.5  2004/06/17 11:47:53  cbouvi
+# Fixed handling of bullet lists. Removed unnecessary blank lines from output
+#
+# Revision 1.4  2004/06/17 07:56:22  cbouvi
+# Converted from utf-8 to latin9
+#
 # Revision 1.3  2004/06/16 15:07:23  cbouvi
 # Added POD
 #
@@ -33,7 +42,7 @@ use strict;
 use Pod::Parser;
 use vars qw/ @ISA $VERSION /;
 
-$VERSION = 0.1;
+$VERSION = 0.2;
 @ISA = qw/ Pod::Parser /;
 
 sub bullet {
@@ -42,7 +51,7 @@ sub bullet {
 
     return '' unless @{$self->{lists}};
     my $bullet = $self->{lists}[-1] x @{$self->{lists}};
-    $bullet =~ tr/#/d/;
+    $bullet =~ tr/d/*/;
     return $bullet;
 }
 
@@ -53,6 +62,7 @@ sub command {
     my $expansion;
     my $out_fh =  $self->output_handle();
     for ( $command ) {
+        /pod/ || /cut/ and return;
         /begin/ and do {
             $self->{ignore_section} = 1;
             return;
@@ -63,7 +73,7 @@ sub command {
         };
         /head(\d)/ and do {
             $expansion = $self->interpolate($paragraph, $line_num);
-            $expansion = ('!' x $1) . $expansion;
+            $expansion = ('!' x $1) . $expansion . "\n";
             last;
         };
         /over/ and do {
@@ -71,8 +81,11 @@ sub command {
             return;
         };
         /back/ and do {
+            if ( $self->{current_item} ) {
+                print $out_fh $self->bullet() . ' ' . $self->{current_item} . "\n";
+                $self->{current_item} = undef;
+            }
             pop @{$self->{lists}};
-            $self->{current_item} = undef;
             return;
         };
         /item/ and do {
@@ -86,7 +99,7 @@ sub command {
             $paragraph =~ s/^\d+\.?\s*//;
 
             if ( $self->{current_item} ) {
-                print $out_fh $self->bullet() . ' ' . $self->{current_item};
+                print $out_fh $self->bullet() . ' ' . $self->{current_item} . "\n";
                 $self->{current_item} = undef;
             }
 
@@ -116,6 +129,9 @@ sub include_definition_title {
         $paragraph = ';' . $self->{current_item} . ": $paragraph";
         $self->{current_item} = undef;
     }
+    else {
+        $paragraph .= "\n";
+    }
     return $paragraph;
 }
 
@@ -125,12 +141,11 @@ sub textblock {
     return if $self->{ignore_section};
 
     my $expansion = $self->interpolate($paragraph, $line_num);
-    $expansion =~ tr/\r\n/ /s;
 
     $expansion = $self->include_definition_title($expansion);
 
     my $out_fh = $self->output_handle();
-    print $out_fh "$expansion\n\n";
+    print $out_fh "$expansion\n";
 }
 
 sub interior_sequence {
@@ -154,10 +169,19 @@ sub verbatim {
     return if $self->{ignore_section};
 
     my $out_fh = $self->output_handle();
-    $paragraph =~ s/\n*$//;
-    $paragraph = "~pp~$paragraph~/pp~\n\n";
+    $paragraph =~ s/[\r\n]*$//;
+    $paragraph = "~pp~$paragraph~/pp~";
     $paragraph = $self->include_definition_title($paragraph);
-    print $out_fh $paragraph;
+    print $out_fh "$paragraph\n";
+}
+
+sub interpolate {
+
+    my $self = shift;
+    local $_ = $self->SUPER::interpolate(@_);
+    tr/ \t\r\n/ /s;
+    s/\s+$//;
+    return $_;
 }
 
 1;
@@ -256,7 +280,7 @@ L<perlpod>, L<Pod::Parser>
 
 =head1 AUTHOR
 
-Copyright Â© 2004 CÃ©dric Bouvier <cbouvi@cpan.org>
+Copyright © 2004 Cédric Bouvier <cbouvi@cpan.org>
 
 This module is free software. You can redistribute and/or modify it under the
 terms of the GNU General Public License.

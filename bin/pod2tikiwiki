@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 use strict;
 
-# $Id: pod2tikiwiki,v 1.2 2004/06/16 15:07:23 cbouvi Exp $
+# $Id: pod2tikiwiki,v 1.3 2004/06/17 07:56:22 cbouvi Exp $
 #
-#  Copyright (C) 2004 CÃ©dric Bouvier
+#  Copyright (C) 2004 Cédric Bouvier
 #
 #  This program is free software; you can redistribute it and/or modify it
 #  under the terms of the GNU General Public License as published by the Free
@@ -20,6 +20,9 @@ use strict;
 #  Place, Suite 330, Boston, MA  02111-1307  USA
 
 # $Log: pod2tikiwiki,v $
+# Revision 1.3  2004/06/17 07:56:22  cbouvi
+# Converted from utf-8 to latin9
+#
 # Revision 1.2  2004/06/16 15:07:23  cbouvi
 # Added POD
 #
@@ -98,8 +101,8 @@ L<perlpod>, L<Pod::TikiWiki>
 
 =head1 AUTHOR
 
-Copyright Â© 2004
+Copyright © 2004
 
-CÃ©dric Bouvier <cbouvi@cpan.org>
+Cédric Bouvier <cbouvi@cpan.org>
 
 =cut

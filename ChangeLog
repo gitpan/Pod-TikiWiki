@@ -1,0 +1,9 @@
+0.2 2004-06-18
+
+        * Bugfixes on the handling of =over lists
+        * Removed useless blank lines from the output
+        * Added a couple of tests
+
+0.1 2004-06-16
+
+        * Initial release on CPAN
