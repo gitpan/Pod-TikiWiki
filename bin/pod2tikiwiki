@@ -1,0 +1,105 @@
+#!/usr/bin/perl
+use strict;
+
+# $Id: pod2tikiwiki,v 1.2 2004/06/16 15:07:23 cbouvi Exp $
+#
+#  Copyright (C) 2004 Cédric Bouvier
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the Free
+#  Software Foundation; either version 2 of the License, or (at your option)
+#  any later version.
+#
+#  This program is distributed in the hope that it will be useful, but WITHOUT
+#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+#  more details.
+#
+#  You should have received a copy of the GNU General Public License along with
+#  this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+#  Place, Suite 330, Boston, MA  02111-1307  USA
+
+# $Log: pod2tikiwiki,v $
+# Revision 1.2  2004/06/16 15:07:23  cbouvi
+# Added POD
+#
+# Revision 1.1.1.1  2004/06/16 10:25:00  cbouvi
+# Initial import
+#
+
+use Pod::TikiWiki;
+
+use Getopt::Long;
+use Pod::Usage;
+
+my %opt;
+GetOptions \%opt, qw/ infile|i=s help|h version|v /
+    or pod2usage -message => "Try $0 --help", -verbose => 0;
+
+pod2usage -verbose => 1 if $opt{help};
+
+if ( $opt{version} ) {
+    print "pod2tikiwiki version $Pod::TikiWiki::VERSION\n";
+    exit 0;
+}
+
+$opt{infile}  ||= shift;
+
+my $p = new Pod::TikiWiki;
+if ( $opt{infile} ) {
+    $p->parse_from_file($opt{infile});
+}
+else {
+    $p->parse_from_filehandle(\*STDIN);
+}
+
+=head1 NAME
+
+pod2tikiwiki - converts a .pod file to TikiWiki syntax.
+
+=head1 SYNOPSIS
+
+    pod2tikiwiki -i in.pod > out.txt
+    pod2tikiwiki in.pod > out.txt
+
+=head1 DESCRIPTION
+
+This program converts the POD syntax to TikiWiki syntax and prints the result
+to the standard output.
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-i> I<FILE>, B<--infile>=I<FILE>
+
+Specify the POD file to convert. When missing, the first argument is taken,
+i.e., these two lines are equivalent:
+
+    pod2tikiwiki -i in.pod
+    pod2tikiwiki in.pod
+
+When both the C<--infile> option and the first argument are missing, the POD is
+read from the standard input.
+
+=item B<-v>, B<--version>
+
+Prints the program's version and exits.
+
+=item B<-h>, B<--help>
+
+Prints a help message and exits.
+
+=back
+
+=head1 SEE ALSO
+
+L<perlpod>, L<Pod::TikiWiki>
+
+=head1 AUTHOR
+
+Copyright © 2004
+
+Cédric Bouvier <cbouvi@cpan.org>
+
+=cut
